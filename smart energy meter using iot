@@ -7,7 +7,7 @@
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-#define  host1 "https://pgcresearch.pavantech.in/SIH1328/pages/Getstatus.php"
+#define  host1 "https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 #if !defined(PZEM_RX_PIN) && !defined(PZEM_TX_PIN)
 #define PZEM_RX_PIN 16
@@ -101,7 +101,7 @@ delay(1000);
   Load_5CurrentPost = String(Load_5Current);
   postData ="Load_1Voltage=" + Load_1VoltagePost + "&Load_1Current=" + Load_1CurrentPost +"&Load_2Current=" + Load_2CurrentPost+"&Load_3Current=" + Load_3CurrentPost+"&Load_4Current=" + Load_4CurrentPost+"&Load_5Current=" + Load_5CurrentPost ;
 
-   http.begin(client,"http://pgcresearch.pavantech.in/LoadMonitor_IoT/InsertDB.php");
+   http.begin(client,"http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");    
  
   int httpCode = http.POST(postData);   
