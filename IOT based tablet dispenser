@@ -1,0 +1,186 @@
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <HTTPClient.h>
+#include <WebServer.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <ESP32Servo.h>
+#include <DHT.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const char* ssid = "XXXXXXXXXXXXX";
+const char* password = "XXXXXXXXXXXXXXXXXXX";
+#define DHT_PIN 25
+#define  host1 "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+Servo myservo; 
+Servo myservo1;
+DHT dht(DHT_PIN, DHT11);
+
+void setup() {
+Serial.begin(115200);
+dht.begin();
+pinMode(19, OUTPUT);
+myservo.attach(5);  
+myservo1.attach(4);
+digitalWrite(19, LOW);
+digitalWrite(19, HIGH);
+digitalWrite(19, LOW);
+digitalWrite(19, HIGH);
+lcd.init();
+lcd.backlight();
+lcd.setCursor(0, 0);
+lcd.print("TUPAC");
+lcd.setCursor(0, 1);
+lcd.print("KCE");
+delay(3000);
+lcd.clear();
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+digitalWrite(19, HIGH);
+
+} 
+
+void loop() {
+if(WiFi.status()== WL_CONNECTED){ 
+  WiFiClient client;
+  HTTPClient http;   
+  int sensorValue = analogRead(33);
+  float voltage = sensorValue * (5.0 / 1023.0);
+  Serial.println(voltage);
+  float temp = dht.readTemperature();
+  Serial.println(temp);
+  int pulsesensorValue = analogRead(26);
+  float pulsevoltage = pulsesensorValue * (5.0 / 1023.0);
+  float pulserate = dht.readHumidity();
+  Serial.println(pulserate);
+  int switchValue = analogRead(27);
+  float switchvoltage = switchValue * (5.0 / 1023.0);
+  Serial.println(switchvoltage);                                                                 
+
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("temp=");
+lcd.print(temp);
+lcd.setCursor(0, 1);
+lcd.print("pluse=");
+lcd.print(pulserate);
+
+String voltagePost,tempPost,pulseratePost,switchvoltagePost,postData;
+   double Load_1Voltage=voltage;
+   double  Load_1temp=temp;
+   double  Load_2pulserate=pulserate;
+   double  Load_3switchvoltage=switchvoltage;
+delay(1000);
+
+  voltagePost = String(Load_1Voltage);  
+  tempPost = String(Load_1temp);  
+  pulseratePost = String(Load_2pulserate);
+  switchvoltagePost = String(Load_3switchvoltage);
+  postData ="temperature=" + tempPost +"&pressure=" + pulseratePost;
+
+   http.begin(client,"https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");    
+ 
+  int httpCode = http.POST(postData);   
+  String payload = http.getString();    
+
+ 
+  Serial.println(httpCode);   
+  Serial.println(payload);   
+  Serial.println("temperature=" + tempPost +"&pressure=" + pulseratePost);
+  http.end(); 
+
+   }
+  HTTPClient http1;
+  http1.begin(host1);
+  http1.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  int httpCode1=http1.GET();
+  String payload=http1.getString(); // get data from webhost continously
+  Serial.println(payload);
+  if(payload == "tray1"){
+  myservo1.write(0);
+  myservo.detach(); //stop servo
+  myservo1.detach(); //stop servo 1
+  myservo.attach(5);  //Start Servo
+  Serial.println("Tray Servo motor moving 90 degree"); 
+  myservo.write(90);  //Rotate servo for 90 degree
+  delay(3000);
+  digitalWrite(19, LOW); //Turn Suction motor ON
+  Serial.println("Pick Ball - Suction ON");
+  //delay(3000);
+  myservo1.attach(4); //Start Servo 1
+  myservo1.write(180); //Rotate servo 1 180 degree for picking 
+  Serial.println("Suction Servo motor moving down "); 
+  delay(3000);
+  myservo1.write(0);
+  Serial.println("Suction Servo motor moving up "); 
+  delay(3000);
+  myservo.write(0);
+  Serial.println("Tray moving to normal position"); 
+  delay(3000);
+  digitalWrite(19, HIGH); //Turn Suction motor OFF
+  Serial.println("Drop Ball - Suction OFF");
+  delay(3000);
+  
+    }else if (payload == "tray2"){
+  myservo.write(0);
+  myservo1.write(0);
+  myservo.detach(); //stop servo
+  myservo1.detach(); //stop servo 1
+  myservo.attach(5);  //Start Servo
+  Serial.println("Tray Servo motor moving 90 degree"); 
+  myservo.write(90);  //Rotate servo for 90 degree
+  delay(3000);
+  digitalWrite(19, LOW); //Turn Suction motor ON
+  Serial.println("Pick Ball - Suction ON");
+  //delay(3000);
+  myservo1.attach(4); //Start Servo 1
+  myservo1.write(120); //Rotate servo 1 180 degree for picking 
+  Serial.println("Suction Servo motor moving down "); 
+  delay(3000);
+  myservo1.write(0);
+  Serial.println("Suction Servo motor moving up "); 
+  delay(3000);
+  myservo.write(0);
+  Serial.println("Tray moving to normal position"); 
+  delay(3000);
+  digitalWrite(19, HIGH); //Turn Suction motor OFF
+  Serial.println("Drop Ball - Suction OFF");
+  delay(3000);
+  
+    }else if (payload == "tray3"){
+  myservo.write(0);
+  myservo1.write(0);
+  myservo.detach(); //stop servo
+  myservo1.detach(); //stop servo 1
+  myservo.attach(5);  //Start Servo
+  Serial.println("Tray Servo motor moving 90 degree"); 
+  myservo.write(90);  //Rotate servo for 90 degree
+  delay(3000);
+  digitalWrite(19, LOW); //Turn Suction motor ON
+  Serial.println("Pick Ball - Suction ON");
+  //delay(3000);
+  myservo1.attach(4); //Start Servo 1
+  myservo1.write(180); //Rotate servo 1 180 degree for picking 
+  Serial.println("Suction Servo motor moving down "); 
+  delay(3000);
+  myservo1.write(0);
+  Serial.println("Suction Servo motor moving up "); 
+  delay(3000);
+  myservo.write(0);
+  Serial.println("Tray moving to normal position"); 
+  delay(3000);
+  digitalWrite(19, HIGH); //Turn Suction motor OFF
+  Serial.println("Drop Ball - Suction OFF");
+  delay(3000);
+    }else{
+        Serial.println("hello");
+    }
+
+}
